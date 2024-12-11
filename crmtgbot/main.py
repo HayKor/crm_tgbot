@@ -2,8 +2,8 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
-
-from crmtgbot.core.config import AppConfig
+from core.config import AppConfig
+from routes import router
 
 
 async def main():
@@ -17,6 +17,7 @@ async def main():
         token=config.bot.token,
     )
     dp = Dispatcher()
+    dp.include_router(router)
 
     try:
         # THIS GOES LAST
