@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.12"
 aiogram = "^3.15.0"
 pydantic-settings = "^2.6.1"
+retailcrm = "^5.1.2"
+dishka = "^1.4.2"
 
 [tool.black]
 line-length = 120

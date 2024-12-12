@@ -3,21 +3,29 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from core.config import AppConfig
+from core.dependencies.container import container
+from dishka.integrations.aiogram import setup_dishka
 from routes import router
 
 
 async def main():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s   %(name)-25s %(levelname)-8s %(message)s",
     )
 
-    config = AppConfig.from_env()
+    config = await container.get(AppConfig)
     bot = Bot(
         token=config.bot.token,
     )
     dp = Dispatcher()
     dp.include_router(router)
+
+    setup_dishka(
+        container=container,
+        router=dp,
+        auto_inject=True,
+    )
 
     try:
         # THIS GOES LAST

@@ -28,6 +28,7 @@ class BotConfig(BaseSettings):
 
 
 class CRMConfig(BaseSettings):
+    url: str
     token: str
 
 
