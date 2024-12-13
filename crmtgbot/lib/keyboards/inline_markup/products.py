@@ -43,3 +43,15 @@ def build_products_kb(products: list[ProductSchema]) -> InlineKeyboardMarkup:
 
     builder.adjust(1)
     return builder.as_markup()
+
+
+def build_product_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    # TODO: add buy cb
+    builder.button(
+        text="🔙 Назад",
+        callback_data=MenuStates.product_groups,
+    )
+
+    builder.adjust(1)
+    return builder.as_markup()
