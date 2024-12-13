@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class ProductGroup(BaseModel):
+class ProductGroupSchema(BaseModel):
     id: int
     site: str
     name: str
