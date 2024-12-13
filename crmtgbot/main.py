@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from core.config import AppConfig
 from core.dependencies.container import container
 from dishka.integrations.aiogram import setup_dishka
+from lib.middlewares.error import ErrorHandlingMiddleware
 from routes import router
 
 
@@ -19,6 +20,7 @@ async def main():
         token=config.bot.token,
     )
     dp = Dispatcher()
+    dp.message.middleware(ErrorHandlingMiddleware())
     dp.include_router(router)
 
     setup_dishka(
