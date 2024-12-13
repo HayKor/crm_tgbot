@@ -4,6 +4,7 @@ from aiogram import F, Router, types
 from aiogram.filters import CommandStart
 from dishka.integrations.aiogram import FromDishka
 from lib.api.product_group import get_product_groups
+from lib.callback.enums.menu import MenuStates
 from lib.keyboards.inline_markup.products import build_product_groups_kb
 from lib.keyboards.reply_markup.menu import build_main_kb
 from retailcrm import v5 as RetailClient
@@ -23,10 +24,17 @@ async def handle_start(message: types.Message):
 
 
 @router.message(F.text == "🎁 Наличие товара")
-async def handle_products(message: types.Message, client: FromDishka[RetailClient]):
+@router.callback_query(F.data == MenuStates.product_groups)
+async def handle_products(event: types.Message | types.CallbackQuery, client: FromDishka[RetailClient]):
     groups = get_product_groups(client)
     text = "Пожалуйста, выберите категорию товаров."
-    await message.reply(
-        text=text,
-        reply_markup=build_product_groups_kb(groups),
-    )
+    if isinstance(event, types.Message):
+        await event.reply(
+            text=text,
+            reply_markup=build_product_groups_kb(groups),
+        )
+    else:
+        await event.message.edit_text(
+            text=text,
+            reply_markup=build_product_groups_kb(groups),
+        )
