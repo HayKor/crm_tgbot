@@ -37,12 +37,13 @@ async def handle_product_cb(
 ):
     cb_data = ProductCallBack.unpack(callback.data)
     product = await get_product(client, redis, cb_data.id)
+
+    price = product.offers[0]["price"]
     text = (
         f"{markdown.hide_link(url=product.imageUrl)}<b>Описание товара:</b> \n"
         f"<b>Наименование:</b> {product.name}\n"
-        f"<b>Цена:</b> {product.offers[0]["price"]} руб.\n"
-        f"<b>Доставка:</b> {product.offers[0]["prices"][0]["ordering"]} руб.\n"
-        f"<b>В наличии:</b> {product.quantity} шт.\n"
+        f"<b>Цена:</b> {price if price else "<i>договорная</i>"} руб.\n"
+        f"<b>В наличии:</b> {product.quantity} шт. (уточнять у продавца)\n"
     )
 
     if callback.message:
