@@ -28,8 +28,12 @@ async def handle_start(message: types.Message):
 
 @router.message(F.text == "🎁 Наличие товара")
 @router.callback_query(F.data == MenuStates.product_groups)
-async def handle_products(event: types.Message | types.CallbackQuery, client: FromDishka[RetailClient]):
-    groups = get_product_groups(client)
+async def handle_products(
+    event: types.Message | types.CallbackQuery,
+    client: FromDishka[RetailClient],
+    redis: FromDishka[Redis],
+):
+    groups = await get_product_groups(client, redis)
     text = "Пожалуйста, выберите категорию товаров."
     if isinstance(event, types.Message):
         await event.reply(

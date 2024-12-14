@@ -1,5 +1,5 @@
 import logging
-from json import loads as json_loads
+from json import dumps as json_dumps, loads as json_loads
 
 from lib.schemas.product import ProductSchema
 from redis.asyncio import Redis
@@ -9,10 +9,25 @@ from retailcrm import v5 as RetailClient
 logger = logging.getLogger(__name__)
 
 
-def get_products(client: RetailClient, group_id: int) -> list[ProductSchema]:
-    response = client.products(filters={"active": True, "groups": [group_id]}).get_response()
-    products = response["products"]
-    return [ProductSchema.model_construct(**product) for product in products]
+async def get_products(client: RetailClient, redis: Redis, group_id: int) -> list[ProductSchema]:
+    if product_list := await redis.get(f"products_of_group:{group_id}"):
+        data_list = json_loads(product_list)
+        return [ProductSchema.model_construct(**item) for item in data_list]
+    else:
+        response = client.products(filters={"active": True, "groups": [group_id]}).get_response()
+        products = response["products"]
+
+        product_schemas = [ProductSchema.model_construct(**product) for product in products]
+        serialized_products = [model.model_dump() for model in product_schemas]
+        await redis.set(
+            f"products_of_group:{group_id}",
+            json_dumps(
+                serialized_products,
+                ensure_ascii=False,
+            ),
+            ex=60,
+        )
+        return product_schemas
 
 
 async def get_product(client: RetailClient, redis: Redis, product_id: int) -> ProductSchema:

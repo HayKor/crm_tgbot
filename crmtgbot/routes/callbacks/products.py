@@ -17,9 +17,10 @@ router = Router(name=__name__)
 async def handle_product_group_cb(
     callback: types.CallbackQuery,
     client: FromDishka[RetailClient],
+    redis: FromDishka[Redis],
 ):
     cb_data = ProductGroupCallBack.unpack(callback.data)
-    products = get_products(client, cb_data.id)
+    products = await get_products(client, redis, cb_data.id)
     if callback.message:
         await callback.message.reply(
             text=f"Товары по категории {cb_data.name}:",
