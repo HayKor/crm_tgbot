@@ -1,11 +1,13 @@
 import logging
 
 from aiogram import F, Router, types
+from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from dishka.integrations.aiogram import FromDishka
 from lib.api.product import get_products_by_ids
 from lib.api.product_group import get_product_groups
 from lib.callback.enums.menu import MenuStates
+from lib.keyboards.inline_markup.cart import build_cart_kb
 from lib.keyboards.inline_markup.products import build_product_groups_kb
 from lib.keyboards.reply_markup.menu import build_main_kb
 from lib.schemas.enums.redis import CartRedisKeyType
@@ -54,13 +56,19 @@ async def handle_cart(message: types.Message, client: FromDishka[RetailClient], 
     products = await get_products_by_ids(client, redis, list(product_ids))
 
     total_sum = 0
+    ordering = 0
     text = "Ваша корзина: \n"
+    text += "<b>Наименование | Цена | Доставка (опционально)</b>\n"
     for product in products:
         price = product.offers[0]["price"]
         ordering = product.offers[0]["prices"][0]["ordering"]
-        text += f"{product.name} | {price} руб. | {ordering} руб.\n"
-        total_sum += price + ordering
+        text += f"{product.name} | {price if price else "<i>договор.</i>"} руб. | {ordering} руб.\n"
+        total_sum += price
 
-    text += f"\nВ сумме: {total_sum} руб."
+    text += f"\n<b>В сумме</b>: {total_sum} руб. (с доставкой - {total_sum+ordering})"
 
-    await message.reply(text=text)
+    await message.reply(
+        text=text,
+        reply_markup=build_cart_kb(),
+        parse_mode=ParseMode.HTML,
+    )
