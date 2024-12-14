@@ -14,11 +14,17 @@ logger = logging.getLogger(__name__)
 class RedisProvider(Provider):
     @provide(scope=Scope.APP)
     async def provide_redis_pool(self, config: AppConfig) -> AsyncGenerator[ConnectionPool, None]:
-        pool = ConnectionPool.from_url(config.redis.url)
-        yield pool
-        await pool.aclose()
+        try:
+            pool = ConnectionPool.from_url(config.redis.url)
+            yield pool
+        except Exception as e:
+            logging.error(f"Redis pool creation error: {e}")
+            raise
 
-    @provide(scope=Scope.REQUEST)
+        finally:
+            await pool.aclose()
+
+    @provide(scope=Scope.APP)
     async def provide_redis_conn(self, pool: ConnectionPool) -> AsyncGenerator[Redis, None]:
         conn = Redis(connection_pool=pool)
         try:

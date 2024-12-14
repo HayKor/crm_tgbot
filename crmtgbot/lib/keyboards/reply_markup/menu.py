@@ -2,7 +2,7 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 
 def build_main_kb() -> ReplyKeyboardMarkup:
-    buy_btn = KeyboardButton(text="💰 Купить")
+    buy_btn = KeyboardButton(text="💰 Корзина")
     products_btn = KeyboardButton(text="🎁 Наличие товара")
     markup = ReplyKeyboardMarkup(
         keyboard=[

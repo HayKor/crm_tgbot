@@ -6,6 +6,7 @@ from lib.api.product import get_product, get_products
 from lib.callback.product import ProductCallBack
 from lib.callback.product_group import ProductGroupCallBack
 from lib.keyboards.inline_markup.products import build_product_kb, build_products_kb
+from redis.asyncio import Redis
 from retailcrm import v5 as RetailClient
 
 
@@ -31,21 +32,22 @@ async def handle_product_group_cb(
 async def handle_product_cb(
     callback: types.CallbackQuery,
     client: FromDishka[RetailClient],
+    redis: FromDishka[Redis],
 ):
     cb_data = ProductCallBack.unpack(callback.data)
-    product = get_product(client, cb_data.id)
-    print(product)
+    product = await get_product(client, redis, cb_data.id)
     text = (
         f"{markdown.hide_link(url=product.imageUrl)}<b>Описание товара:</b> \n"
         f"<b>Наименование:</b> {product.name}\n"
-        f"<b>Цена:</b> {product.offers[0]["price"]}\n"
-        f"<b>Доставка:</b>: {product.offers[0]["prices"][0]["ordering"]}\n"
+        f"<b>Цена:</b> {product.offers[0]["price"]} руб.\n"
+        f"<b>Доставка:</b> {product.offers[0]["prices"][0]["ordering"]} руб.\n"
+        f"<b>В наличии:</b> {product.quantity} шт.\n"
     )
 
     if callback.message:
         await callback.message.reply(
             text=text,
-            reply_markup=build_product_kb(),
+            reply_markup=build_product_kb(product.id),
             parse_mode=ParseMode.HTML,
         )
     await callback.answer()

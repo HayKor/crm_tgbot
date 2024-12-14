@@ -21,6 +21,7 @@ async def main():
     )
     dp = Dispatcher()
     dp.message.middleware(ErrorHandlingMiddleware())
+    dp.callback_query.middleware(ErrorHandlingMiddleware())
     dp.include_router(router)
 
     setup_dishka(
