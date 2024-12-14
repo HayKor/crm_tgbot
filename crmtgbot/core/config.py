@@ -32,6 +32,11 @@ class CRMConfig(BaseSettings):
     token: str
 
 
+class RedisConfig(BaseConfig):
+    url: str
+
+
 class AppConfig(BaseConfig):
     bot: BotConfig
     crm: CRMConfig
+    redis: RedisConfig
