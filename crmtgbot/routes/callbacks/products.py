@@ -22,7 +22,7 @@ async def handle_product_group_cb(
     cb_data = ProductGroupCallBack.unpack(callback.data)
     products = await get_products(client, redis, cb_data.id)
     if callback.message:
-        await callback.message.reply(
+        await callback.message.edit_text(
             text=f"Товары по категории {cb_data.name}:",
             reply_markup=build_products_kb(products),
         )
@@ -47,7 +47,7 @@ async def handle_product_cb(
     )
 
     if callback.message:
-        await callback.message.reply(
+        await callback.message.edit_text(
             text=text,
             reply_markup=build_product_kb(product.id),
             parse_mode=ParseMode.HTML,

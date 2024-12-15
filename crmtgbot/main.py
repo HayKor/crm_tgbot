@@ -11,7 +11,7 @@ from routes import router
 
 async def main():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.WARNING,
         format="%(asctime)s   %(name)-25s %(levelname)-8s %(message)s",
     )
 

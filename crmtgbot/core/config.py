@@ -36,7 +36,12 @@ class RedisConfig(BaseConfig):
     url: str
 
 
+class ManagementConfig(BaseConfig):
+    manager_id: int
+
+
 class AppConfig(BaseConfig):
     bot: BotConfig
     crm: CRMConfig
     redis: RedisConfig
+    management: ManagementConfig
