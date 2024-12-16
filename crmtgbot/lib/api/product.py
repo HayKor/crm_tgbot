@@ -14,7 +14,13 @@ async def get_products(client: RetailClient, redis: Redis, group_id: int) -> lis
         data_list = json_loads(product_list)
         return [ProductSchema.model_construct(**item) for item in data_list]
     else:
-        response = client.products(filters={"active": True, "groups": [group_id]}).get_response()
+        response = client.products(
+            filters={
+                "active": True,
+                "groups": [group_id],
+                "minQuantity": 1,
+            }
+        ).get_response()
         products = response["products"]
 
         product_schemas = [ProductSchema.model_construct(**product) for product in products]
