@@ -47,12 +47,13 @@ def build_products_kb(products: list[ProductSchema]) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def build_product_kb(product_id: int) -> InlineKeyboardMarkup:
+def build_product_kb(product_id: int, product_amount: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="🛒 Добавить в корзину",
         callback_data=CartCallBack(
             product_id=product_id,
+            product_amount=product_amount,
             action=CartActions.add,
         ),
     )

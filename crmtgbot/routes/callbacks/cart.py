@@ -28,9 +28,12 @@ async def handle_cart_add_cb(
     redis: FromDishka[Redis],
 ):
     cb_data = CartCallBack.unpack(callback.data)
-    client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
-    await redis.sadd(client_cart, str(cb_data.product_id))
-    await callback.answer("Товар добавлен в корзину. Можете продолжить покупки.")
+    if cb_data.product_amount:
+        client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
+        await redis.sadd(client_cart, str(cb_data.product_id))
+        await callback.answer("Товар добавлен в корзину. Можете продолжить покупки.")
+    else:
+        await callback.answer("Сейчас нету этого товара в наличии.")
 
 
 @router.callback_query(F.data == CartActions.clean)

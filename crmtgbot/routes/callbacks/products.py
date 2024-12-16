@@ -43,13 +43,13 @@ async def handle_product_cb(
         f"{markdown.hide_link(url=product.imageUrl)}<b>Описание товара:</b> \n"
         f"<b>Наименование:</b> {product.name}\n"
         f"<b>Цена:</b> {price if price else "<i>договорная</i>"} руб.\n"
-        f"<b>В наличии:</b> {product.quantity} шт. (уточнять у продавца)\n"
+        f"<b>В наличии:</b> {product.quantity} шт.\n"
     )
 
     if callback.message:
         await callback.message.edit_text(
             text=text,
-            reply_markup=build_product_kb(product.id),
+            reply_markup=build_product_kb(product.id, product.quantity),
             parse_mode=ParseMode.HTML,
         )
     await callback.answer()

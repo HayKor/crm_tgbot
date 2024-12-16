@@ -30,4 +30,4 @@ prod-compose:
 
 .PHONY: prod-destroy
 prod-destroy:
-	docker compose -p crmtgbot -f deployment/docker-compose.yml down --remove-orphans
+	docker compose -p crmtgbot -f deployment/docker-compose.yml down -v --remove-orphans
