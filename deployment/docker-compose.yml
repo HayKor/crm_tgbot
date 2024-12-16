@@ -3,9 +3,7 @@ version: "3.8"
 
 services:
   app:
-    build:
-      context: ../
-      dockerfile: deployment/Dockerfile
+    image: &app_image ghcr.io/haykor/crm_tgbot:latest
 
     restart: unless-stopped
 
