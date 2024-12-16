@@ -28,9 +28,12 @@ async def handle_cart_add_cb(
     redis: FromDishka[Redis],
 ):
     cb_data = CartCallBack.unpack(callback.data)
-    client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
-    await redis.sadd(client_cart, str(cb_data.product_id))
-    await callback.answer("Товар добавлен в корзину. Можете продолжить покупки.")
+    if cb_data.product_amount:
+        client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
+        await redis.sadd(client_cart, str(cb_data.product_id))
+        await callback.answer("Товар добавлен в корзину. Можете продолжить покупки.")
+    else:
+        await callback.answer("Сейчас нету этого товара в наличии.")
 
 
 @router.callback_query(F.data == CartActions.clean)
@@ -56,12 +59,30 @@ async def handle_cart_order_cb(
 ):
     client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
     if await redis.smembers(client_cart):
-        await state.set_state(OrderStates.phone)
+        await state.set_state(OrderStates.fullname)
         await callback.answer()
         if callback.message:
-            await callback.message.reply(text="Пожалуйста, напишите свой номер телефона.")
+            await callback.message.reply(text="Пожалуйста, напишите свои имя и фамилию через пробел.")
     else:
         await callback.answer("Ваша корзина пуста.")
+
+
+@router.message(OrderStates.fullname)
+async def handle_fullname_order(
+    message: types.Message,
+    state: FSMContext,
+):
+    fullname = message.text
+    if fullname is not None and len(fullname.split()) == 2:
+        await state.update_data(fullname=message.text)
+        await state.set_state(OrderStates.phone)
+        await message.reply(
+            text="Пожалуйста, напишите свой номер телефона.",
+        )
+    else:
+        await message.reply(
+            text="Пожалуйста, введите имя и фамилию.",
+        )
 
 
 @router.message(OrderStates.phone)
@@ -104,6 +125,7 @@ async def create_crm_order(
         products=products,
         phone=data["phone"],
         nickname=user.username,
+        fullname=data["fullname"],
     ):
         await message.answer("Что-то пошло не так...")
         logger.error("Couldn't create order")
@@ -112,6 +134,7 @@ async def create_crm_order(
     text = (
         "Новый заказ!\n"
         f"<b>Никнейм</b>: {"@" + user.username if user.username else "нету"}\n"
+        f"<b>Имя и фамилия</b>: {data["fullname"]}\n"
         f"<b>Ссылка на аккаунт</b>: {user.url}\n"
         f"<b>Номер телефона</b>: <code>{data["phone"]}</code>\n\n"
     )

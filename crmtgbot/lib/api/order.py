@@ -6,9 +6,13 @@ def create_order(
     client: RetailClient,
     products: list[ProductSchema],
     phone: int,
+    fullname: str,
     nickname: str | None = None,
 ) -> bool:
+    first_name, last_name = fullname.split()
     order_info = {
+        "firstName": first_name,
+        "lastName": last_name,
         "managerComment": nickname if nickname else "no telegram nickname",
         "phone": phone,
         "items": [
