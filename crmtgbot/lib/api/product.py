@@ -18,12 +18,18 @@ async def get_products(client: RetailClient, redis: Redis, group_id: int) -> lis
             filters={
                 "active": True,
                 "groups": [group_id],
-                "minQuantity": 1,
+                # "minQuantity": 1,
             }
         ).get_response()
         products = response["products"]
 
         product_schemas = [ProductSchema.model_construct(**product) for product in products]
+        product_schemas = list(
+            filter(
+                lambda product: product.quantity >= 1,
+                product_schemas,
+            )
+        )
         serialized_products = [model.model_dump() for model in product_schemas]
         await redis.set(
             f"products_of_group:{group_id}",
