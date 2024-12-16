@@ -1,0 +1,43 @@
+---
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    volumes:
+      - ./config:/config:ro
+
+    healthcheck:
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 2s
+      start_interval: 1s
+
+    ports:
+      - 8000:8000
+
+  redis:
+    image: redis:7-alpine
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      start_period: 1s
+      start_interval: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 5

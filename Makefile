@@ -23,3 +23,11 @@ dev-compose:
 .PHONY: dev-destroy
 dev-destroy:
 	docker compose -p crmtgbot -f deployment/docker-compose.local.yml down -v --remove-orphans
+
+.PHONY: prod-compose
+prod-compose:
+	docker compose -p crmtgbot -f deployment/docker-compose.yml up -d --build --remove-orphans
+
+.PHONY: prod-destroy
+prod-destroy:
+	docker compose -p crmtgbot -f deployment/docker-compose.yml down --remove-orphans
