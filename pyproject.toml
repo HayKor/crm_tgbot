@@ -9,7 +9,24 @@ readme = "README.md"
 python = "^3.12"
 aiogram = "^3.15.0"
 pydantic-settings = "^2.6.1"
+retailcrm = "^5.1.2"
+dishka = "^1.4.2"
+redis = "^5.2.1"
 
+[tool.black]
+line-length = 120
+target-version = ['py312']
+
+[tool.isort]
+line_length = 120
+atomic = true
+include_trailing_comma = true
+use_parentheses = true
+profile = "black"
+lines_before_imports = 1
+lines_after_imports = 2
+combine_as_imports = true
+multi_line_output = 3
 
 [build-system]
 requires = ["poetry-core"]
