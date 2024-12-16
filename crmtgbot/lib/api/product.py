@@ -18,7 +18,7 @@ async def get_products(client: RetailClient, redis: Redis, group_id: int) -> lis
             filters={
                 "active": True,
                 "groups": [group_id],
-                # "minQuantity": 1,
+                "minQuantity": 1,
             }
         ).get_response()
         products = response["products"]
