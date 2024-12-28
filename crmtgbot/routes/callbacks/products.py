@@ -1,16 +1,21 @@
+import logging
+
 from aiogram import Router, types
 from aiogram.enums import ParseMode
 from aiogram.utils import markdown
 from dishka.integrations.aiogram import FromDishka
 from lib.api.product import get_product, get_products
+from lib.api.product_group import get_product_child_groups
 from lib.callback.product import ProductCallBack
 from lib.callback.product_group import ProductGroupCallBack
-from lib.keyboards.inline_markup.products import build_product_kb, build_products_kb
+from lib.keyboards.inline_markup.products import build_product_groups_kb, build_product_kb, build_products_kb
 from redis.asyncio import Redis
 from retailcrm import v5 as RetailClient
 
 
 router = Router(name=__name__)
+
+logger = logging.getLogger(__name__)
 
 
 @router.callback_query(ProductGroupCallBack.filter())
@@ -20,13 +25,22 @@ async def handle_product_group_cb(
     redis: FromDishka[Redis],
 ):
     cb_data = ProductGroupCallBack.unpack(callback.data)
-    products = await get_products(client, redis, cb_data.id)
-    if callback.message:
-        await callback.message.edit_text(
-            text=f"Товары по категории {cb_data.name}:",
-            reply_markup=build_products_kb(products),
-        )
-    await callback.answer()
+    if cb_data.parentid == 0 and (groups := await get_product_child_groups(client, redis, cb_data.id)):
+        if callback.message:
+            await callback.message.edit_text(
+                text="Пожалуйста, выберите категорию товаров.",
+                reply_markup=build_product_groups_kb(groups),
+            )
+        await callback.answer()
+    else:
+        products = await get_products(client, redis, cb_data.id)
+        if callback.message:
+            await callback.message.edit_text(
+                text=f'Товары по категории <b>"{cb_data.name}"</b>:',
+                reply_markup=build_products_kb(products),
+                parse_mode=ParseMode.HTML,
+            )
+        await callback.answer()
 
 
 @router.callback_query(ProductCallBack.filter())

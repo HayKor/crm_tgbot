@@ -14,14 +14,26 @@ from lib.schemas.product_group import ProductGroupSchema
 logger = logging.getLogger(__name__)
 
 
-def build_product_groups_kb(groups: list[ProductGroupSchema]) -> InlineKeyboardMarkup:
+def build_product_groups_kb(groups: list[ProductGroupSchema], is_menu: bool = False) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for group in groups:
-        cb_data = ProductGroupCallBack(id=group.id, name=group.name)
+        if hasattr(group, "parentId"):
+            cb_data = ProductGroupCallBack(
+                id=group.id, name=group.name[: min(30, len(group.name))], parentid=group.parentId
+            )
+        else:
+            cb_data = ProductGroupCallBack(id=group.id, name=group.name[: min(30, len(group.name))], parentid=0)
         builder.button(
             text=group.name.title(),
             callback_data=cb_data.pack(),
+        )
+        logging.debug("Build a product group button: %s", group)
+
+    if not is_menu:
+        builder.button(
+            text="🔙 Назад",
+            callback_data=MenuStates.product_groups,
         )
 
     builder.adjust(2)
