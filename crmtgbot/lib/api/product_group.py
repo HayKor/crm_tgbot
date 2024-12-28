@@ -14,7 +14,6 @@ async def get_product_groups(client: RetailClient, redis: Redis) -> list[Product
         data_list = json_loads(product_groups)
         return [ProductGroupSchema.model_construct(**item) for item in data_list]
     else:
-        # response = client.product_groups(filters={"active": True}).get_response()
         response = client.product_groups(filters={"maxLevel": 1}).get_response()
         groups = response["productGroup"]
         product_groups = [ProductGroupSchema.model_construct(**group) for group in groups]
@@ -35,7 +34,6 @@ async def get_product_child_groups(client: RetailClient, redis: Redis, parentId:
         data_list = json_loads(product_groups)
         return [ProductGroupSchema.model_construct(**item) for item in data_list]
     else:
-        # response = client.product_groups(filters={"active": True}).get_response()
         response = client.product_groups(filters={"parentGroupId": parentId, "active": True}).get_response()
         groups = response["productGroup"]
         product_groups = [ProductGroupSchema.model_construct(**group) for group in groups]
