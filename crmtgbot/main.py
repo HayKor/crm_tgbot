@@ -10,12 +10,18 @@ from routes import router
 
 
 async def main():
-    logging.basicConfig(
-        level=logging.WARNING,
-        format="%(asctime)s   %(name)-25s %(levelname)-8s %(message)s",
-    )
-
     config = await container.get(AppConfig)
+    if config.production:
+        logging.basicConfig(
+            level=logging.WARNING,
+            format="%(asctime)s   %(name)-25s %(levelname)-8s %(message)s",
+        )
+    else:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s   %(name)-25s %(levelname)-8s %(message)s",
+        )
+
     bot = Bot(
         token=config.bot.token,
     )

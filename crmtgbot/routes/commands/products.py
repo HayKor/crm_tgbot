@@ -40,12 +40,12 @@ async def handle_products(
     if isinstance(event, types.Message):
         await event.reply(
             text=text,
-            reply_markup=build_product_groups_kb(groups),
+            reply_markup=build_product_groups_kb(groups, is_menu=True),
         )
     else:
         await event.message.edit_text(
             text=text,
-            reply_markup=build_product_groups_kb(groups),
+            reply_markup=build_product_groups_kb(groups, is_menu=True),
         )
 
 
