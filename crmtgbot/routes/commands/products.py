@@ -52,20 +52,18 @@ async def handle_products(
 @router.message(F.text == "💰 Корзина")
 async def handle_cart(message: types.Message, client: FromDishka[RetailClient], redis: FromDishka[Redis]):
     client_cart = CartRedisKeyType.cart.format(message.from_user.id)
-    product_ids = await redis.smembers(client_cart)
+    product_ids = await redis.smembers(client_cart)  # type: ignore
     products = await get_products_by_ids(client, redis, list(product_ids))
 
     total_sum = 0
-    ordering = 0
     text = "Ваша корзина: \n"
-    text += "<b>Наименование | Цена | Доставка (опционально)</b>\n"
+    text += "<b>Наименование | Цена</b>\n"
     for product in products:
         price = product.offers[0]["price"]
-        ordering = product.offers[0]["prices"][0]["ordering"]
-        text += f"{product.name} | {price if price else "<i>договор.</i>"} руб. | {ordering} руб.\n"
+        text += f"{product.name} | {price if price else "<i>договор.</i>"} руб.\n"
         total_sum += price
 
-    text += f"\n<b>В сумме</b>: {total_sum} руб. (с доставкой - {total_sum+ordering})"
+    text += f"\n<b>В сумме</b>: {total_sum} руб."
 
     await message.reply(
         text=text,

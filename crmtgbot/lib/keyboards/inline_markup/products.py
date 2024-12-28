@@ -32,7 +32,7 @@ def build_product_groups_kb(groups: list[ProductGroupSchema], is_menu: bool = Fa
 
     if not is_menu:
         builder.button(
-            text="🔙 Назад",
+            text="🔙 Главная",
             callback_data=MenuStates.product_groups,
         )
 
@@ -51,7 +51,7 @@ def build_products_kb(products: list[ProductSchema]) -> InlineKeyboardMarkup:
         )
 
     builder.button(
-        text="🔙 Назад",
+        text="🔙 Главная",
         callback_data=MenuStates.product_groups,
     )
 
@@ -70,7 +70,7 @@ def build_product_kb(product_id: int, product_amount: int) -> InlineKeyboardMark
         ),
     )
     builder.button(
-        text="🔙 Назад",
+        text="🔙 Главная",
         callback_data=MenuStates.product_groups,
     )
 

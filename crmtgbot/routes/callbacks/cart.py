@@ -11,6 +11,8 @@ from lib.api.product import get_products_by_ids
 from lib.callback.cart import CartCallBack
 from lib.callback.enums.cart import CartActions
 from lib.keyboards.inline_markup.cart import build_cart_kb
+from lib.keyboards.reply_markup.menu import build_main_kb
+from lib.keyboards.reply_markup.order import build_choice_kb
 from lib.schemas.enums.redis import CartRedisKeyType
 from lib.states.order import OrderStates
 from redis.asyncio import Redis
@@ -58,13 +60,37 @@ async def handle_cart_order_cb(
     redis: FromDishka[Redis],
 ):
     client_cart = CartRedisKeyType.cart.format(callback.from_user.id)
-    if await redis.smembers(client_cart):
-        await state.set_state(OrderStates.fullname)
+    if await redis.smembers(client_cart):  # type: ignore
+        await state.set_state(OrderStates.shipping)
         await callback.answer()
         if callback.message:
-            await callback.message.reply(text="Пожалуйста, напишите свои имя и фамилию через пробел.")
+            await callback.message.reply(
+                text="Пожалуйста, выберете, нужна ли вам доставка?",
+                reply_markup=build_choice_kb(),
+            )
     else:
         await callback.answer("Ваша корзина пуста.")
+
+
+@router.message(OrderStates.shipping)
+async def handle_shipping_order(
+    message: types.Message,
+    state: FSMContext,
+):
+    text = message.text
+    if text in ["✅ Да", "❌ Нет"]:
+        choice = text == "✅ Да"
+        await state.update_data(shipping=choice)
+        await state.set_state(OrderStates.fullname)
+        await message.reply(
+            text="Пожалуйста, напишите свои имя и фамилию через пробел.",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+    else:
+        await message.reply(
+            text="Пожалуйста, выберете, нужна ли вам доставка?",
+            reply_markup=build_choice_kb(),
+        )
 
 
 @router.message(OrderStates.fullname)
@@ -105,7 +131,10 @@ async def handle_phone_number_order(
         client=client,
     )
 
-    await message.answer("Спасибо! Ваш заказ отправлен, скоро его обработают наши менеджеры.")
+    await message.answer(
+        text="Спасибо! Ваш заказ отправлен, скоро его обработают наши менеджеры.",
+        reply_markup=build_main_kb(),
+    )
     await state.clear()
 
 
@@ -128,15 +157,15 @@ async def create_crm_order(
         fullname=data["fullname"],
     ):
         await message.answer("Что-то пошло не так...")
-        logger.error("Couldn't create order")
+        logger.error("Couldn't create order with data: %s", data)
         return
-
     text = (
         "Новый заказ!\n"
         f"<b>Никнейм</b>: {"@" + user.username if user.username else "нету"}\n"
         f"<b>Имя и фамилия</b>: {data["fullname"]}\n"
         f"<b>Ссылка на аккаунт</b>: {user.url}\n"
         f"<b>Номер телефона</b>: <code>{data["phone"]}</code>\n\n"
+        f"<b>Доставка</b>: <b>{"✅ Да" if data["shipping"] else "❌ Нет"}</b>\n\n"
     )
     text += "<b>Состав</b>\n"
     for product in products:

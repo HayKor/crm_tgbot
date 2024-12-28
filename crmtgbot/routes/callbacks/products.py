@@ -27,7 +27,7 @@ async def handle_product_group_cb(
     cb_data = ProductGroupCallBack.unpack(callback.data)
     if cb_data.parentid == 0 and (groups := await get_product_child_groups(client, redis, cb_data.id)):
         if callback.message:
-            await callback.message.edit_text(
+            await callback.message.edit_text(  # type: ignore
                 text="Пожалуйста, выберите категорию товаров.",
                 reply_markup=build_product_groups_kb(groups),
             )
@@ -35,7 +35,7 @@ async def handle_product_group_cb(
     else:
         products = await get_products(client, redis, cb_data.id)
         if callback.message:
-            await callback.message.edit_text(
+            await callback.message.edit_text(  # type: ignore
                 text=f'Товары по категории <b>"{cb_data.name}"</b>:',
                 reply_markup=build_products_kb(products),
                 parse_mode=ParseMode.HTML,
@@ -61,7 +61,7 @@ async def handle_product_cb(
     )
 
     if callback.message:
-        await callback.message.edit_text(
+        await callback.message.edit_text(  # type: ignore
             text=text,
             reply_markup=build_product_kb(product.id, product.quantity),
             parse_mode=ParseMode.HTML,

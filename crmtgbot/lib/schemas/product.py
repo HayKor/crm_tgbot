@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ProductSchema(BaseModel):
@@ -14,7 +13,6 @@ class ProductSchema(BaseModel):
     imageUrl: str
     groups: list[int]
     offers: list[dict[str, Any]]
-    updatedAt: datetime = Field(alias="updatedAt")
     active: bool
     quantity: int
     markable: bool
