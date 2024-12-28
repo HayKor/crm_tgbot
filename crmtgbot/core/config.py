@@ -45,3 +45,4 @@ class AppConfig(BaseConfig):
     crm: CRMConfig
     redis: RedisConfig
     management: ManagementConfig
+    production: bool = True
